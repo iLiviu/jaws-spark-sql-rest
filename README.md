@@ -308,23 +308,40 @@ Example:
 }
 
 ### queryInfo api:
-    curl 'http://devbox.local:8181/jaws/queryInfo?queryID=140413187977964cf5f85-0dd3-4484-84a3-7703b098c2e7' -X GET
+    curl 'http://devbox.local:8181/jaws/queryInfo?queryID=1429534537434ecf62272-1273-4b3a-8b27-efd68ab0fe04&queryID=140413187977964cf5f85-0dd3-4484-84a3-7703b098c2e7' -X GET
 
 Parameters:
 
-  * queryID [required] : uuid returned by the run api.
+  * queryID [required] : uuid returned by the run api. Indetifies a query
 
 Results:
 
-The api returns the status and the query string (could be one statement or an entire HiveQL script)
+The api returns the information about all the requested query ids (could be one statement or an entire HiveQL script)
 
 Example:
 
+        [{
+            "state": "DONE",
+            "queryID": "1429534537434ecf62272-1273-4b3a-8b27-efd68ab0fe04",
+            "query": "USE testDb;\n\nselect count (*) from test",
+            "runMetaInfo": {
+                "nrOfResults": 1,
+                "maxNrOfResults": 100,
+                "resultsDestination": 0,
+                "isLimited": true
+            }
+        },
         {
             "state": "DONE",
-            "queryID": "1404998257416357bb29d-6801-41ca-82e4-7a265816b50c",
-            "query": "USE test;\n\nselect * from user_predictions limit 3"
-        }
+            "queryID": "140413187977964cf5f85-0dd3-4484-84a3-7703b098c2e7",
+            "query": "drop database if exists sample cascade;\ncreate database sample;\nuse sample;\n\nDROP TABLE IF EXISTS tt;\n\ncreate external table tt(line STRING) stored as textfile location 'hdfs://devbox.local:8020/user/ubuntu/test/';\n\nselect count(*) from tt;",
+            "runMetaInfo": {
+                "nrOfResults": 1,
+                "maxNrOfResults": 100,
+                "resultsDestination": 0,
+                "isLimited": true
+            }
+        }]
 
 ### Databases api:
     curl 'http://devbox.local:8181/jaws/databases' -X GET

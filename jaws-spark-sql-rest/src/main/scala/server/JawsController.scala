@@ -236,7 +236,7 @@ object JawsController extends App with SimpleRoutingApp with CORSDirectives {
       }
   }
 
-  def runManagementRoute : Route = path("run") {
+  def runManagementRoute: Route = path("run") {
     post {
       parameters('numberOfResults.as[Int] ? 100, 'limited.as[Boolean], 'destination.as[String] ? Configuration.rddDestinationLocation.getOrElse("hdfs")) { (numberOfResults, limited, destination) =>
         corsFilter(List(Configuration.corsFilterAllowedHosts.getOrElse("*"))) {
@@ -340,16 +340,22 @@ object JawsController extends App with SimpleRoutingApp with CORSDirectives {
     } ~
     path("queryInfo") {
       get {
-        parameters('queryID) { queryID =>
+        parameterSeq { params =>
           corsFilter(List(Configuration.corsFilterAllowedHosts.getOrElse("*"))) {
-            validate(queryID != null && !queryID.trim.isEmpty, Configuration.UUID_EXCEPTION_MESSAGE) {
-
+            val queries = params map { touple =>
+              touple match {
+                case ("queryID", value) => value
+              } 
+            } 
+            validate(!queries.isEmpty, Configuration.UUID_EXCEPTION_MESSAGE) {
               respondWithMediaType(MediaTypes.`application/json`) { ctx =>
-                val future = ask(getQueryInfoActor, GetQueryInfoMessage(queryID))
+                queries foreach println
+                val future = ask(getQueryInfoActor, GetQueryInfoMessage(queries))
                 future.map {
                   case e: ErrorMessage => ctx.complete(StatusCodes.InternalServerError, e.message)
-                  case result: Query => ctx.complete(StatusCodes.OK, result)
+                  case result: List[Query] => ctx.complete(StatusCodes.OK, result)
                 }
+
               }
             }
           }

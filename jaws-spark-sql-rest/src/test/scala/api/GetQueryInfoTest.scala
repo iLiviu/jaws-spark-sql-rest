@@ -53,8 +53,8 @@ class GetQueryInfoTest extends FunSuite with BeforeAndAfter with ScalaFutures {
 
     val tAct = TestActorRef(new GetQueryInfoApiActor(dals))
     val queryId = System.currentTimeMillis() + UUID.randomUUID().toString()
-    val f = tAct ? GetQueryInfoMessage(queryId)
-    whenReady(f)(s => assert(s === new Query("NOT_FOUND", queryId, "", new QueryMetaInfo)))
+    val f = tAct ? GetQueryInfoMessage(List(queryId))
+    whenReady(f)(s => assert(s === List(new Query("NOT_FOUND", queryId, "", new QueryMetaInfo))))
 
   }
 
@@ -68,8 +68,8 @@ class GetQueryInfoTest extends FunSuite with BeforeAndAfter with ScalaFutures {
     dals.loggingDal.setScriptDetails(queryId, "test script")
     dals.loggingDal.setMetaInfo(queryId, metaInfo)
     
-    val f = tAct ? GetQueryInfoMessage(queryId)
-    whenReady(f)(s => assert(s === new Query("IN_PROGRESS", queryId, "test script", metaInfo)))
+    val f = tAct ? GetQueryInfoMessage(List(queryId))
+    whenReady(f)(s => assert(s === List(new Query("IN_PROGRESS", queryId, "test script", metaInfo))))
     
     dals.loggingDal.deleteQuery(queryId)
 
