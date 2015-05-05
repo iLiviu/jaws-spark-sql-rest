@@ -1,3 +1,5 @@
+dist
+bower_components
 .cache
 syntax: glob
 *.log
